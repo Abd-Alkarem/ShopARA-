@@ -5,7 +5,24 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        @if(request()->routeIs('login'))
+    <title>ShopARA-Login</title>
+@elseif(request()->routeIs('register'))
+    <title>ShopARA-Register</title>
+@elseif(request()->routeIs('password.request'))
+    <title>ShopARA-Forgot Password</title>
+@elseif(request()->routeIs('password.reset'))
+    <title>ShopARA-Reset Password</title>
+@elseif(request()->routeIs('verification.notice'))
+    <title>ShopARA-Verify Email</title>
+@elseif(request()->routeIs('password.confirm'))
+    <title>ShopARA-Confirm Password</title>
+@else
+    <title>{{ config('app.name', 'ShopARA') }}</title>
+@endif
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

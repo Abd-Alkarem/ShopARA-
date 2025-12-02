@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="ShopARA-Success">
     <div class="flex items-center justify-center min-h-screen">
         <div class="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
             <!-- Success Icon -->
@@ -14,10 +14,10 @@
             </h2>
             
             <p class="text-gray-600 mb-6">
-                Your account has been created successfully. You will be redirected to the login page shortly.
+                Your account has been created successfully. Redirecting to login...
             </p>
 
-            <!-- Redirect Timer -->
+            <!-- Quick Redirect Indicator -->
             <div class="mb-6">
                 <div class="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-md">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,14 +25,14 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     <span class="text-sm text-green-800 font-medium">
-                        Redirecting in <span id="countdown">3</span> seconds...
+                        Redirecting momentarily...
                     </span>
                 </div>
             </div>
 
             <!-- Manual Redirect Link -->
             <div class="text-sm">
-                <span class="text-gray-500">Not redirected?</span>
+                <span class="text-gray-500">Taking too long?</span>
                 <a href="{{ route('login') }}" class="font-medium text-green-600 hover:text-green-500 ml-1">
                     Go to login now
                 </a>
@@ -40,19 +40,11 @@
         </div>
     </div>
 
-    <!-- JavaScript for countdown and redirect -->
+    <!-- JavaScript for quick redirect (0.2 seconds) -->
     <script>
-        let countdown = 3;
-        const countdownElement = document.getElementById('countdown');
-        
-        const timer = setInterval(() => {
-            countdown--;
-            countdownElement.textContent = countdown;
-            
-            if (countdown <= 0) {
-                clearInterval(timer);
-                window.location.href = '{{ route("login") }}';
-            }
-        }, 1000);
+        // Redirect after 200 milliseconds (0.2 seconds)
+        setTimeout(() => {
+            window.location.href = '{{ route("login") }}';
+        }, 200);
     </script>
 </x-guest-layout>

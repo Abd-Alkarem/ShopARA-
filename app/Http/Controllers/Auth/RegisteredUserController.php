@@ -43,8 +43,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Flash success message and show success page with delayed redirect
-        session()->flash('message', 'Registration successful! Redirecting to login...');
+        // Flash success message and show success page with quick redirect
+        session()->flash('message', 'Registration successful! Redirecting...');
 
         return view('auth.register-success');
     }

@@ -20,42 +20,32 @@ new #[Layout('layouts.guest')] class extends Component
      */
     public function register(): void
     {
-        try {
-            $validated = $this->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-                'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
-            ]);
+        $validated = $this->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ]);
 
-            // Remove manual hashing since User model handles it automatically
-            event(new Registered($user = User::create($validated)));
+        $validated['password'] = Hash::make($validated['password']);
 
-            // Flash a success message
-            session()->flash('message', 'Registration successful! Please log in.');
+        event(new Registered($user = User::create($validated)));
 
-            // Clear form fields and force a full page redirect
-            $this->reset();
-            $this->js('window.location.href = "' . route('login') . '"');
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            logger('Registration error: ' . $e->getMessage());
-            
-            // Show a user-friendly error message
-            $this->addError('registration', 'Registration failed. Please try again.');
-        }
+        Auth::login($user);
+
+        $this->redirect('/', navigate: true);
     }
 }; ?>
 
 <div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <!-- Registration Error -->
-    @if ($errors->has('registration'))
-        <div class="mb-4 font-medium text-sm text-red-600">
-            {{ $errors->get('registration') }}
-        </div>
-    @endif
+    <!-- Back to Home Button -->
+    <div class="mb-6">
+        <a href="/" class="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium transition">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
 
     <form wire:submit="register">
         <!-- Name -->

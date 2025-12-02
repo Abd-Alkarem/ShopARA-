@@ -1,7 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
 
 new class extends Component
@@ -9,13 +8,11 @@ new class extends Component
     /**
      * Log the current user out of the application.
      */
-    public function logout(): void
+    public function logout(Logout $logout): void
     {
-        Auth::guard('web')->logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        $logout();
 
-        $this->redirect(route('login'), navigate: true);
+        $this->redirect('/', navigate: true);
     }
 }; ?>
 
@@ -26,7 +23,7 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="/" wire:navigate>
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
@@ -58,20 +55,13 @@ new class extends Component
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('items')">
-                            {{ __('Items') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('cart')">
-                            {{ __('Cart') }}
-                        </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}" class="block">
-                            @csrf
-                            <button type="submit" class="block w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                        <button wire:click="logout" class="w-full text-start">
+                            <x-dropdown-link>
                                 {{ __('Log Out') }}
-                            </button>
-                        </form>
+                            </x-dropdown-link>
+                        </button>
                     </x-slot>
                 </x-dropdown>
             </div>
@@ -107,20 +97,13 @@ new class extends Component
                 <x-responsive-nav-link :href="route('profile')" wire:navigate>
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('items')">
-                    {{ __('Items') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('cart')">
-                    {{ __('Cart') }}
-                </x-responsive-nav-link>
 
                 <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}" class="block">
-                            @csrf
-                            <button type="submit" class="block w-full text-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
-                                {{ __('Log Out') }}
-                            </button>
-                        </form>
+                <button wire:click="logout" class="w-full text-start">
+                    <x-responsive-nav-link>
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                </button>
             </div>
         </div>
     </div>

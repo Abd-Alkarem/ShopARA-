@@ -41,20 +41,9 @@
     </div>
 
     <script>
-        // Get user ID from Blade (passed from Laravel) with fallback
-        const userId = {{ auth()->check() ? auth()->id() : 'null' }};
-        
-        // Only initialize cart if user is authenticated
-        let cart = {};
-        let cartKey = 'cart_guest';
-        
-        if (userId !== null) {
-            cartKey = 'cart_user_' + userId;
-            cart = JSON.parse(localStorage.getItem(cartKey)) || {};
-        } else {
-            // Fallback for unauthenticated users (shouldn't happen due to auth middleware)
-            cart = JSON.parse(localStorage.getItem(cartKey)) || {};
-        }
+        // Get cart data from Laravel session (passed from controller)
+        // Use user-specific cart logic to match Livewire addToCart method
+        let cart = @json(auth()->check() ? session()->get('cart_user_' . auth()->id(), []) : session()->get('cart_guest', []));
         
         function updateCartDisplay() {
             const cartItems = Object.values(cart);
@@ -206,53 +195,77 @@
         }
 
         function updateQuantity(itemId, quantity) {
-            // Double-check user is authenticated
-            if (userId === null) {
-                alert('Please log in to manage your cart.');
-                return;
-            }
-            
             if (quantity <= 0) {
                 removeItem(itemId);
                 return;
             }
 
-            if (cart[itemId]) {
-                cart[itemId].quantity = quantity;
-                localStorage.setItem(cartKey, JSON.stringify(cart));
-                updateCartDisplay();
-            }
+            fetch(`/cart/update/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cart = data.cart;
+                    updateCartDisplay();
+                }
+            })
+            .catch(error => {
+                console.error('Error updating quantity:', error);
+                showMessage('Error updating quantity');
+            });
         }
 
         function removeItem(itemId) {
-            // Double-check user is authenticated
-            if (userId === null) {
-                alert('Please log in to manage your cart.');
-                return;
-            }
-            
-            if (cart[itemId]) {
-                delete cart[itemId];
-                localStorage.setItem(cartKey, JSON.stringify(cart));
-                updateCartDisplay();
-                
-                // Show success message
-                showMessage('Item removed from cart!');
+            if (confirm('Are you sure you want to remove this item?')) {
+                fetch(`/cart/remove/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        cart = data.cart;
+                        updateCartDisplay();
+                        showMessage('Item removed from cart!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing item:', error);
+                    showMessage('Error removing item');
+                });
             }
         }
 
         function clearCart() {
-            // Double-check user is authenticated
-            if (userId === null) {
-                alert('Please log in to manage your cart.');
-                return;
-            }
-            
             if (confirm('Are you sure you want to clear your entire cart?')) {
-                cart = {};
-                localStorage.setItem(cartKey, JSON.stringify(cart));
-                updateCartDisplay();
-                showMessage('Cart cleared!');
+                fetch('/cart/clear', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        cart = {};
+                        updateCartDisplay();
+                        showMessage('Cart cleared!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing cart:', error);
+                    showMessage('Error clearing cart');
+                });
             }
         }
 
